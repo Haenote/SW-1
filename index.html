@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatbot</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+    #chat {
+      margin: 20px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      overflow-y: scroll;
+      max-height: 400px;
+    }
+    .message {
+      margin-bottom: 10px;
+    }
+    .message p {
+      margin: 5px 0;
+      padding: 8px 12px;
+      border-radius: 20px;
+      background-color: #e1f5fe;
+      display: inline-block;
+    }
+    .user-message p {
+      background-color: #ffcc80;
+      text-align: right;
+    }
+    #messageInput {
+      width: calc(100% - 70px);
+      padding: 10px;
+      border: none;
+      border-radius: 20px;
+      margin-right: 10px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      outline: none;
+    }
+    #sendButton {
+      width: 60px;
+      padding: 10px;
+      border: none;
+      border-radius: 20px;
+      background-color: #4caf50;
+      color: #fff;
+      cursor: pointer;
+      margin-bottom: 20px;
+      font-size: 16px;
+      outline: none;
+    }
+    #sendButton:hover {
+      background-color: #45a049;
+    }
+    .read-status {
+      float: right;
+      margin-top: 5px;
+      color: #aaa;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center; font-size: 32px; color: #333;">Chat System</h1>
+  <div id="chat"></div>
+  <div id="sendSection" style="margin: 20px;">
+    <input type="text" id="messageInput" placeholder="Type a message...">
+    <button id="sendButton" onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    const ws = new WebSocket('ws://localhost:8080');
+    const chat = document.getElementById('chat');
+    const messageInput = document.getElementById('messageInput');
+
+    ws.onmessage = function(event) {
+      const message = JSON.parse(event.data);
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message');
+      
+      const messageContent = document.createElement('p');
+      messageContent.textContent = message.text;
+
+      if (message.from === 'User') {
+        messageElement.classList.add('user-message');
+      }
+
+      const readStatus = document.createElement('span');
+      readStatus.classList.add('read-status');
+      readStatus.textContent = message.read ? 'Read' : 'Unread';
+
+      messageContent.appendChild(readStatus);
+      messageElement.appendChild(messageContent);
+      chat.appendChild(messageElement);
+    };
+
+    function sendMessage() {
+      const message = messageInput.value;
+      const messageObj = {
+        from: 'User',
+        text: message,
+        read: false
+      };
+      ws.send(JSON.stringify(messageObj));
+      messageInput.value = '';
+    }
+  </script>
+</body>
+</html>
