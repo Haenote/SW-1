@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Chatbot</title>
+  <title>Chat System</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -9,8 +9,13 @@
       margin: 0;
       padding: 0;
     }
+    .chat-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
     #chat {
-      margin: 20px;
+      margin-top: 20px;
       padding: 20px;
       background-color: #fff;
       border-radius: 10px;
@@ -19,26 +24,26 @@
       max-height: 400px;
     }
     .message {
-      margin-bottom: 10px;
+      margin-bottom: 15px; /* 채팅 박스 간격 늘리기 */
+      padding: 10px 15px; /* 채팅 박스 내부 여백 조정 */
+      border-radius: 15px; /* 채팅 박스 모서리 둥글게 */
     }
     .message p {
-      margin: 5px 0;
-      padding: 8px 12px;
-      border-radius: 20px;
-      background-color: #e1f5fe;
-      display: inline-block;
+      margin: 0;
+      font-size: 16px; /* 채팅 메시지 폰트 크기 */
+      line-height: 1.5; /* 채팅 메시지 줄간격 */
     }
-    .user-message p {
-      background-color: #ffcc80;
-      text-align: right;
+    #sendSection {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
     }
     #messageInput {
-      width: calc(100% - 70px);
+      flex: 1;
       padding: 10px;
       border: none;
       border-radius: 20px;
       margin-right: 10px;
-      margin-bottom: 20px;
       font-size: 16px;
       outline: none;
     }
@@ -50,27 +55,22 @@
       background-color: #4caf50;
       color: #fff;
       cursor: pointer;
-      margin-bottom: 20px;
       font-size: 16px;
       outline: none;
     }
     #sendButton:hover {
       background-color: #45a049;
     }
-    .read-status {
-      float: right;
-      margin-top: 5px;
-      color: #aaa;
-      font-size: 12px;
-    }
   </style>
 </head>
 <body>
-  <h1 style="text-align: center; font-size: 32px; color: #333;">Chat System</h1>
-  <div id="chat"></div>
-  <div id="sendSection" style="margin: 20px;">
-    <input type="text" id="messageInput" placeholder="Type a message...">
-    <button id="sendButton" onclick="sendMessage()">Send</button>
+  <div class="chat-container">
+    <h1 style="text-align: center; font-size: 32px; color: #333;">Chat System</h1>
+    <div id="chat"></div>
+    <div id="sendSection">
+      <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+      <button id="sendButton" onclick="sendMessage()">Send</button>
+    </div>
   </div>
 
   <script>
@@ -82,7 +82,7 @@
       const message = JSON.parse(event.data);
       const messageElement = document.createElement('div');
       messageElement.classList.add('message');
-      
+
       const messageContent = document.createElement('p');
       messageContent.textContent = message.text;
 
@@ -90,24 +90,30 @@
         messageElement.classList.add('user-message');
       }
 
-      const readStatus = document.createElement('span');
-      readStatus.classList.add('read-status');
-      readStatus.textContent = message.read ? 'Read' : 'Unread';
-
-      messageContent.appendChild(readStatus);
       messageElement.appendChild(messageContent);
       chat.appendChild(messageElement);
+      scrollToBottom();
     };
 
     function sendMessage() {
       const message = messageInput.value;
       const messageObj = {
         from: 'User',
-        text: message,
-        read: false
+        text: message
       };
       ws.send(JSON.stringify(messageObj));
       messageInput.value = '';
+      scrollToBottom();
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+
+    function scrollToBottom() {
+      chat.scrollTop = chat.scrollHeight;
     }
   </script>
 </body>
